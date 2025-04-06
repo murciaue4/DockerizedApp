@@ -39,6 +39,6 @@ app.use('/user', userRoute);
 app.use('/auth', authRoute); 
 
 
-app.listen(app.get('port'), () => {
+app.listen(app.get('port'), "0.0.0.0", () => {
     console.log(`Server running on port`, app.get('port'));
 });
