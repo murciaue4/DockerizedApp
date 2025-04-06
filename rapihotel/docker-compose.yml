@@ -1,0 +1,55 @@
+
+services:
+  mysql:
+    build: ./db            # Se usa la carpeta "db" que contiene el Dockerfile personalizado
+    container_name: mysql_db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  server:
+    build: ./server
+    container_name: server_app
+    restart: always
+    depends_on:
+      - mysql
+    environment:
+      DB_HOST: mysql
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+      DB_PORT: ${DB_PORT}
+      PORT: ${PORT}
+      JET_SECRET: ${JET_SECRET}
+      MAIL_USER: ${MAIL_USER}
+      MAIL_PASS: ${MAIL_PASS}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION}
+      AWS_BUCKET_NAME: ${AWS_BUCKET_NAME}
+    ports:
+      - "${PORT}:${PORT}"
+    volumes:
+      - ./server:/app     
+      - /app/node_modules    
+
+  client:
+    build: ./client
+    container_name: client_app
+    restart: always
+    depends_on:
+      - server
+    ports:
+      - "80:3000"     # Puerto para el cliente formato local:container
+    volumes:
+      - ./client:/app        # Monta el código del cliente para hot reload
+      - /app/node_modules    # Refleja cambios en node_modules
+
+volumes:
+  mysql_data:
